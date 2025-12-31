@@ -26,4 +26,4 @@ struct ActuatorStatus {
     bool valveOpen;
     bool heaterOn;
     int motorSpeed; // 0: off, 1: Low, 2: High
-};.
+};
