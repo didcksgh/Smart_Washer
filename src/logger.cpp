@@ -22,17 +22,17 @@ static const char* stateToStr(WasherState state) {
 }
 
 void Logger::logState(WasherState state) {
-    std::cout << "STATE: " << stateToStr(state) << std::endl;
+    std::cout << "STATE:" << stateToStr(state) << std::endl;
 }
 
 void Logger::logStatus(WasherState state,
                        int waterLevel,
                        const ActuatorStatus& actuators) {
-    std::cout << "STATE: "
+    std::cout << "STATE:"
     << stateToStr(state)
-    << " level=  " << waterLevel
-    << " valve= " << actuators.valveOpen
-    << " heater= " << actuators.heaterOn
-    << " motor= " << actuators.motorSpeed
+    << " level=" << waterLevel
+    << " valve=" << actuators.valveOpen
+    << " heater=" << actuators.heaterOn
+    << " motor=" << actuators.motorSpeed
     << std::endl;
 }

@@ -5,24 +5,13 @@
 #include "sensorModule.h"
 #include "actuatorModule.h"
 #include "washerController.h"
-
-static const char* stateToStr(WasherState s) {
-    switch (s) {
-        case WasherState::Idle:     return "Idle";
-        case WasherState::Filling:  return "Filling";
-        case WasherState::Washing:  return "Washing";
-        case WasherState::Rinsing:  return "Rinsing";
-        case WasherState::Spinning: return "Spinning";
-        case WasherState::Error:    return "Error";
-        default:                    return "Unknown";
-    }
-}
-
+#include "logger.h"
 
 int main() {
     SensorModule sensors;
     ActuatorModule actuators;
     WasherController controller(sensors, actuators);
+    Logger logger;
 
     const int tickMs = 500;
 
@@ -53,14 +42,8 @@ int main() {
 
         ActuatorStatus a = actuators.getStatus();
 
-        std::cout
-            << "state=" << stateToStr(controller.getState())
-            << " level=" << sensors.getWaterLevel()
-            << " valve=" << a.valveOpen
-            << " heater=" << a.heaterOn
-            << " motor=" << a.motorSpeed
-            << std::endl;
-
+        logger.logStatus(state, sensors.getWaterLevel(), a);
+        
         if (controller.getState() != WasherState::Idle) {
             cycleStarted = true;
         }
