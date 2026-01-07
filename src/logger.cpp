@@ -21,15 +21,40 @@ static const char* stateToStr(WasherState state) {
     }
 }
 
-void Logger::logState(WasherState state) {
-    std::cout << "STATE:" << stateToStr(state) << std::endl;
+static const char* modeToStr(WashMode m) {
+    switch(m) {
+        case WashMode::Normal:
+            return "Normal";
+
+        case WashMode::Quick:
+            return "Quick";
+
+        case WashMode::Heavy:
+            return "Heavy";
+        
+        default:
+            return "Error";
+
+    }
+
+
 }
 
-void Logger::logStatus(WasherState state,
+void Logger::logState(WasherState state) {
+    std::cout << "[STATE]" << stateToStr(state) << std::endl;
+}
+
+void Logger::logMode(WashMode mode) {
+    std::cout << "[MODE]" << modeToStr(mode) << std::endl;
+}
+
+void Logger::logStatus(WashMode mode, WasherState state,
                        int waterLevel,
                        const ActuatorStatus& actuators) {
-    std::cout << "STATE:"
-    << stateToStr(state)
+    std::cout << "[MODE] " << modeToStr(mode)
+    << " | "
+    << " [STATE]" << stateToStr(state)
+    << " | "
     << " level=" << waterLevel
     << " valve=" << actuators.valveOpen
     << " heater=" << actuators.heaterOn

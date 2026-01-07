@@ -3,14 +3,16 @@
 #include "types.h"
 #include "sensorModule.h"
 #include "actuatorModule.h"
+#include "washMode.h"
 
 class WasherController {
 public:
-    WasherController(SensorModule& sensorssRef, ActuatorModule& actuatorsRef);
+    WasherController(SensorModule& sensorsRef, ActuatorModule& actuatorsRef);
 
-    void startCycle(WasherMode newMode);
+    void startCycle(WashMode newMode);
     void update(int elapsedMs);
     WasherState getState() const;
+    WashMode getMode() const;
 
 
 
@@ -20,7 +22,7 @@ private:
     ActuatorModule& actuators;
 
     WasherState state;
-    WasherMode mode;
+    WashMode mode;
 
     void enterState(WasherState newState);
     void handleIdle();
@@ -35,6 +37,7 @@ private:
     int washTimeMs;
     int rinseTimeMs;
     int spinTimeMs;
+    bool heaterOnDuringWash;
 
 
 };

@@ -11,11 +11,6 @@ enum class WasherState{
 
 };
 
-//Washer mode
-enum class WasherMode {
-    Normal
-};
-
 struct Sensors {
     bool doorClosed;
     int waterLevel; // 0 to 100

@@ -6,6 +6,7 @@
 #include "actuatorModule.h"
 #include "washerController.h"
 #include "logger.h"
+#include "washMode.h"
 
 int main() {
     SensorModule sensors;
@@ -15,12 +16,14 @@ int main() {
 
     const int tickMs = 500;
 
-    controller.startCycle(WasherMode::Normal);
+    controller.startCycle(WashMode::Heavy);
+
 
     using clock = std::chrono::steady_clock;
     auto prev = clock::now();
 
     bool cycleStarted = false;
+
 
     for(int i = 0; i < 500; i++) {
 
@@ -35,14 +38,16 @@ int main() {
 
         }
 
-        WasherState state = controller.getState();
+        WasherState stateBefore = controller.getState();
 
-        sensors.update(elapsedMs, state);
+        sensors.update(elapsedMs, stateBefore);
         controller.update(elapsedMs);
 
         ActuatorStatus a = actuators.getStatus();
+        WasherState stateAfter = controller.getState();
+        WashMode mode = controller.getMode();
 
-        logger.logStatus(state, sensors.getWaterLevel(), a);
+        logger.logStatus(mode, stateAfter, sensors.getWaterLevel(), a);
         
         if (controller.getState() != WasherState::Idle) {
             cycleStarted = true;

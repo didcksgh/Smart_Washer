@@ -3,7 +3,7 @@
 WasherController::WasherController(SensorModule& sensorsRef, ActuatorModule& actuatorsRef)
     : sensors(sensorsRef), actuators(actuatorsRef) {
         state = WasherState::Idle;
-        mode = WasherMode::Normal;
+        mode = WashMode::Normal;
         stateElapsedMs = 0;
 
         //default config values in Feature 1
@@ -11,17 +11,20 @@ WasherController::WasherController(SensorModule& sensorsRef, ActuatorModule& act
         washTimeMs = 10000;
         rinseTimeMs = 5000;
         spinTimeMs = 3000;
+        heaterOnDuringWash = false;
 
 }
 
-void WasherController::startCycle(WasherMode newMode) {
+void WasherController::startCycle(WashMode newMode) {
     if (state == WasherState::Idle) {
         mode = newMode;
+        WashConfig cfg = getWashConfig(mode);
 
-        targetWaterLevel = 60;
-        washTimeMs = 10000;
-        rinseTimeMs = 5000;
-        spinTimeMs = 3000;
+        targetWaterLevel = cfg.targetWaterLevel;
+        washTimeMs = cfg.washTimeMs;
+        rinseTimeMs = cfg.rinseTimeMs;
+        spinTimeMs = cfg.spinTimeMs;
+        heaterOnDuringWash = cfg.heaterOnDuringWash;
 
         enterState(WasherState::Filling);
     }
@@ -56,6 +59,10 @@ WasherState WasherController::getState() const {
     return state;
 }
 
+WashMode WasherController::getMode() const {
+    return mode;
+}
+
 void WasherController::enterState(WasherState newState) {
     state = newState;
     stateElapsedMs = 0;
@@ -81,8 +88,7 @@ void WasherController::handleFilling() {
 
 void WasherController::handleWashing() {
     actuators.setWaterValve(false);
-    //Later, I need to modify this by the modes
-    actuators.setHeater(false);
+    actuators.setHeater(heaterOnDuringWash);
     actuators.setMotorSpeed(1);
 
     if(stateElapsedMs >= washTimeMs) {
