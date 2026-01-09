@@ -4,6 +4,7 @@ ActuatorModule::ActuatorModule() {
 
     status.valveOpen = false;
     status.heaterOn = false;
+    status.drainPumpOn = false;
     status.motorSpeed = 0;
 
 }
@@ -14,6 +15,11 @@ void ActuatorModule::setWaterValve(bool open) {
 
 void ActuatorModule::setHeater(bool on) {
     status.heaterOn = on;
+}
+
+void ActuatorModule::setDrainPump(bool on) {
+    status.drainPumpOn = on;
+
 }
 
 void ActuatorModule::setMotorSpeed(int spd) {

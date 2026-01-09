@@ -16,7 +16,7 @@ int main() {
 
     const int tickMs = 500;
 
-    controller.startCycle(WashMode::Heavy);
+    controller.startCycle(WashMode::Normal);
 
 
     using clock = std::chrono::steady_clock;
@@ -35,19 +35,20 @@ int main() {
 
         if(elapsedMs < 0) {
             elapsedMs = 0;
-
         }
 
-        WasherState stateBefore = controller.getState();
-
-        sensors.update(elapsedMs, stateBefore);
         controller.update(elapsedMs);
 
         ActuatorStatus a = actuators.getStatus();
-        WasherState stateAfter = controller.getState();
+        int activeTarget = controller.getActiveFillTargetWaterLevel();
+
+        sensors.update(elapsedMs, a, activeTarget);
+        
+
+        WasherState state = controller.getState();
         WashMode mode = controller.getMode();
 
-        logger.logStatus(mode, stateAfter, sensors.getWaterLevel(), a);
+        logger.logStatus(mode, state, sensors.getWaterLevel(), a);
         
         if (controller.getState() != WasherState::Idle) {
             cycleStarted = true;

@@ -20,5 +20,6 @@ struct Sensors {
 struct ActuatorStatus {
     bool valveOpen;
     bool heaterOn;
+    bool drainPumpOn;
     int motorSpeed; // 0: off, 1: Low, 2: High
 };

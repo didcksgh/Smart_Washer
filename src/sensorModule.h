@@ -5,7 +5,7 @@ class SensorModule {
 public:
     SensorModule();
     
-    void update(int elapsed_ms, WasherState state);
+    void update(int elapsed_ms, const ActuatorStatus& actuators, int activeFillTargetWaterLevel);
 
     bool isDoorClosed() const;
     int getWaterLevel() const;

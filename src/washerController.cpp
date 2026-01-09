@@ -11,7 +11,11 @@ WasherController::WasherController(SensorModule& sensorsRef, ActuatorModule& act
         washTimeMs = 10000;
         rinseTimeMs = 5000;
         spinTimeMs = 3000;
+        rinseTargetWaterLevel = 40;
+        rinseAgitateTimeMs = 3000;
+        rinsePhase = RinsePhase::Drain;
         heaterOnDuringWash = false;
+        rinsingSecondDrain = false;
 
 }
 
@@ -21,7 +25,9 @@ void WasherController::startCycle(WashMode newMode) {
         WashConfig cfg = getWashConfig(mode);
 
         targetWaterLevel = cfg.targetWaterLevel;
+        rinseTargetWaterLevel = cfg.rinseTargetWaterLevel;
         washTimeMs = cfg.washTimeMs;
+        rinseAgitateTimeMs = cfg.rinseAgitateTimeMs;
         rinseTimeMs = cfg.rinseTimeMs;
         spinTimeMs = cfg.spinTimeMs;
         heaterOnDuringWash = cfg.heaterOnDuringWash;
@@ -33,7 +39,10 @@ void WasherController::startCycle(WashMode newMode) {
 void WasherController::update(int elapsedMs) {
     stateElapsedMs += elapsedMs;
 
-    switch (state) {
+    //guard to prevent inifinite loop
+    for(int i = 0; i < 5; i++) {
+        stateChangedThisTick = false;
+        switch (state) {
         case WasherState::Idle:
             handleIdle();
             break;
@@ -52,7 +61,26 @@ void WasherController::update(int elapsedMs) {
         case WasherState::Error:
             handleIdle();
             break;
+        }
+
+        if(!stateChangedThisTick) {
+        break;
+
+        }
     }
+    
+}
+
+int WasherController::getActiveFillTargetWaterLevel() const {
+    if(state == WasherState::Filling) {
+        return targetWaterLevel;
+
+    }
+    if(state == WasherState::Rinsing && rinsePhase == RinsePhase::Filling) {
+        return rinseTargetWaterLevel;
+
+    }
+    return -1;
 }
 
 WasherState WasherController::getState() const {
@@ -66,11 +94,19 @@ WashMode WasherController::getMode() const {
 void WasherController::enterState(WasherState newState) {
     state = newState;
     stateElapsedMs = 0;
+    stateChangedThisTick = true;
+
+    if(newState == WasherState::Rinsing) {
+        rinsePhase = RinsePhase::Drain;
+        rinsingSecondDrain = false;
+
+    }
 }
 
 void WasherController::handleIdle() {
     actuators.setWaterValve(false);
     actuators.setHeater(false);
+    actuators.setDrainPump(false);
     actuators.setMotorSpeed(0);
 
 }
@@ -78,9 +114,11 @@ void WasherController::handleIdle() {
 void WasherController::handleFilling() {
     actuators.setWaterValve(true);
     actuators.setHeater(false);
+    actuators.setDrainPump(false);
     actuators.setMotorSpeed(0);
 
     if(sensors.getWaterLevel() >= targetWaterLevel) {
+        actuators.setWaterValve(false);
         enterState(WasherState::Washing);
 
     }
@@ -89,6 +127,7 @@ void WasherController::handleFilling() {
 void WasherController::handleWashing() {
     actuators.setWaterValve(false);
     actuators.setHeater(heaterOnDuringWash);
+    actuators.setDrainPump(false);
     actuators.setMotorSpeed(1);
 
     if(stateElapsedMs >= washTimeMs) {
@@ -98,19 +137,68 @@ void WasherController::handleWashing() {
 }
 
 void WasherController::handleRinsing() {
-    actuators.setWaterValve(false);
-    actuators.setHeater(false);
-    actuators.setMotorSpeed(1);
 
-    if(stateElapsedMs >= rinseTimeMs) {
-        enterState(WasherState::Spinning);
+    switch (rinsePhase)
+    {
+    case RinsePhase::Drain:
+        actuators.setWaterValve(false);
+        actuators.setHeater(false);
+        actuators.setDrainPump(true);
+        actuators.setMotorSpeed(1);
 
+        if(sensors.getWaterLevel() <= 0) {
+            stateElapsedMs = 0;
+            if(!rinsingSecondDrain) {
+                rinsePhase = RinsePhase::Filling;
+
+            }else {
+                enterState(WasherState::Spinning);
+
+            }
+            
+
+        }
+
+        break;
+    
+    case RinsePhase::Filling:
+        actuators.setWaterValve(true);
+        actuators.setHeater(false);
+        actuators.setDrainPump(false);
+        actuators.setMotorSpeed(0);
+
+        if(sensors.getWaterLevel() == rinseTargetWaterLevel) {
+            actuators.setWaterValve(false);
+
+            stateElapsedMs = 0;
+            rinsePhase = RinsePhase::Agitate;
+
+        }
+        break;
+
+    case RinsePhase::Agitate:
+        actuators.setWaterValve(false);
+        actuators.setHeater(false);
+        actuators.setDrainPump(false);
+        actuators.setMotorSpeed(1);
+
+        if(stateElapsedMs >= rinseAgitateTimeMs) {
+            stateElapsedMs = 0;
+            rinsePhase = RinsePhase::Drain;
+            rinsingSecondDrain = true;
+
+        }
+        break;
+
+    default:
+        break;
     }
 }
 
 void WasherController::handleSpinning() {
     actuators.setWaterValve(false);
     actuators.setHeater(false);
+    actuators.setDrainPump(true);
     actuators.setMotorSpeed(2);
 
     if(stateElapsedMs >= spinTimeMs) {

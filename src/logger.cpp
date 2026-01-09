@@ -41,11 +41,11 @@ static const char* modeToStr(WashMode m) {
 }
 
 void Logger::logState(WasherState state) {
-    std::cout << "[STATE]" << stateToStr(state) << std::endl;
+    std::cout << "[STATE] " << stateToStr(state) << std::endl;
 }
 
 void Logger::logMode(WashMode mode) {
-    std::cout << "[MODE]" << modeToStr(mode) << std::endl;
+    std::cout << "[MODE] " << modeToStr(mode) << std::endl;
 }
 
 void Logger::logStatus(WashMode mode, WasherState state,
@@ -53,7 +53,7 @@ void Logger::logStatus(WashMode mode, WasherState state,
                        const ActuatorStatus& actuators) {
     std::cout << "[MODE] " << modeToStr(mode)
     << " | "
-    << " [STATE]" << stateToStr(state)
+    << " [STATE] " << stateToStr(state)
     << " | "
     << " level=" << waterLevel
     << " valve=" << actuators.valveOpen

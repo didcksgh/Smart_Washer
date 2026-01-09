@@ -7,16 +7,34 @@ SensorModule::SensorModule() {
     sensors.temperature = 25;
 }
 
-void SensorModule::update(int elapsed_ms, WasherState state) {
+void SensorModule::update(int elapsed_ms, const ActuatorStatus& actuators, int activeFillTargetWaterLevel) {
     int increase = 0;
+    int decrease = 0;
 
-    if(state == WasherState::Filling) {
+    if(actuators.valveOpen) {
         //1 unit is increased by 500 ms
         increase = elapsed_ms/500;
 
+        //Clamp the increase so it cannot cross the active target in a single tick
+        if(activeFillTargetWaterLevel >= 0) {
+            int remainingToTarget = activeFillTargetWaterLevel - sensors.waterLevel;
+            if (remainingToTarget < 0) remainingToTarget = 0;          
+            if (increase > remainingToTarget) increase = remainingToTarget;
+        }
+
+    }
+
+    if(actuators.drainPumpOn) {
+        //1 unit is decreased by 300 ms
+        decrease = elapsed_ms/300;
+
+        if (decrease > sensors.waterLevel) {
+            decrease = sensors.waterLevel;
+        } 
     }
 
     sensors.waterLevel += increase;
+    sensors.waterLevel -= decrease;
 
     //water level should be ranged in from 0 to 100
     if(sensors.waterLevel > 100) {

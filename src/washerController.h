@@ -11,6 +11,8 @@ public:
 
     void startCycle(WashMode newMode);
     void update(int elapsedMs);
+    int getActiveFillTargetWaterLevel() const;
+
     WasherState getState() const;
     WashMode getMode() const;
 
@@ -18,11 +20,18 @@ public:
 
 
 private:
+    enum class RinsePhase{
+        Filling,
+        Agitate,
+        Drain
+    };
+
     SensorModule& sensors;
     ActuatorModule& actuators;
 
     WasherState state;
     WashMode mode;
+    RinsePhase rinsePhase;
 
     void enterState(WasherState newState);
     void handleIdle();
@@ -34,10 +43,16 @@ private:
     int stateElapsedMs;
 
     int targetWaterLevel;
+    int rinseTargetWaterLevel;
     int washTimeMs;
+    int rinseAgitateTimeMs;
     int rinseTimeMs;
     int spinTimeMs;
     bool heaterOnDuringWash;
+    bool rinsingSecondDrain;
+    bool stateChangedThisTick;
+
+    
 
 
 };

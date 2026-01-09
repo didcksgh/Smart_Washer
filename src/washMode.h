@@ -10,8 +10,10 @@ enum class WashMode {
 // Define a configuration container for a full cycle
 struct WashConfig {
     int targetWaterLevel;
+    int rinseTargetWaterLevel;
     int washTimeMs;
     int rinseTimeMs;
+    int rinseAgitateTimeMs;
     int spinTimeMs;
     bool heaterOnDuringWash;
 };
