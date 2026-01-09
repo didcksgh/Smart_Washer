@@ -11,6 +11,12 @@ enum class WasherState{
 
 };
 
+enum class RinsePhase{
+        Filling,
+        Agitate,
+        Drain
+};
+
 struct Sensors {
     bool doorClosed;
     int waterLevel; // 0 to 100

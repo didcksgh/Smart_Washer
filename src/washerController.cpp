@@ -4,6 +4,7 @@ WasherController::WasherController(SensorModule& sensorsRef, ActuatorModule& act
     : sensors(sensorsRef), actuators(actuatorsRef) {
         state = WasherState::Idle;
         mode = WashMode::Normal;
+        rinsePhase = RinsePhase::Drain;
         stateElapsedMs = 0;
 
         //default config values in Feature 1
@@ -91,6 +92,10 @@ WashMode WasherController::getMode() const {
     return mode;
 }
 
+RinsePhase WasherController::getPhase() const {
+    return rinsePhase;
+}
+
 void WasherController::enterState(WasherState newState) {
     state = newState;
     stateElapsedMs = 0;
@@ -149,6 +154,7 @@ void WasherController::handleRinsing() {
         if(sensors.getWaterLevel() <= 0) {
             stateElapsedMs = 0;
             if(!rinsingSecondDrain) {
+                actuators.setWaterValve(true);
                 rinsePhase = RinsePhase::Filling;
 
             }else {

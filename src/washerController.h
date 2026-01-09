@@ -15,17 +15,12 @@ public:
 
     WasherState getState() const;
     WashMode getMode() const;
+    RinsePhase getPhase() const;
 
 
 
 
 private:
-    enum class RinsePhase{
-        Filling,
-        Agitate,
-        Drain
-    };
-
     SensorModule& sensors;
     ActuatorModule& actuators;
 

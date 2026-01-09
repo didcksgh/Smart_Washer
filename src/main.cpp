@@ -47,8 +47,9 @@ int main() {
 
         WasherState state = controller.getState();
         WashMode mode = controller.getMode();
+        RinsePhase phase = controller.getPhase();
 
-        logger.logStatus(mode, state, sensors.getWaterLevel(), a);
+        logger.logStatus(mode, state, phase, sensors.getWaterLevel(), a);
         
         if (controller.getState() != WasherState::Idle) {
             cycleStarted = true;
