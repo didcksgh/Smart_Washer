@@ -17,7 +17,8 @@ WasherController::WasherController(SensorModule& sensorsRef, ActuatorModule& act
         rinseAgitateTimeMs = 3000;
         rinsePhase = RinsePhase::Drain;
         heaterOnDuringWash = false;
-        rinsingSecondDrain = false;
+        rinseCyclesTotal = 2;
+        rinseCyclesCompleted = 0;
 
 }
 
@@ -34,6 +35,8 @@ void WasherController::startCycle(WashMode newMode) {
         rinseTimeMs = cfg.rinseTimeMs;
         spinTimeMs = cfg.spinTimeMs;
         heaterOnDuringWash = cfg.heaterOnDuringWash;
+        rinseCyclesTotal = cfg.rinseCycles;
+        rinseCyclesCompleted = 0;
 
         enterState(WasherState::Filling);
     }
@@ -114,13 +117,13 @@ void WasherController::enterState(WasherState newState) {
 
     if(newState == WasherState::Rinsing) {
         rinsePhase = RinsePhase::Drain;
-        rinsingSecondDrain = false;
+        rinseCyclesCompleted = 0;
 
     }
 
     if(newState == WasherState::Error) {
         rinsePhase = RinsePhase::Drain;
-        rinsingSecondDrain = false;
+        rinseCyclesCompleted = 0;
 
     }
 }
@@ -170,15 +173,15 @@ void WasherController::handleRinsing() {
 
         if(sensors.getWaterLevel() <= 0) {
             stateElapsedMs = 0;
-            if(!rinsingSecondDrain) {
-                actuators.setWaterValve(true);
-                rinsePhase = RinsePhase::Filling;
+            actuators.setDrainPump(false);
 
-            }else {
+            if(rinseCyclesCompleted >= rinseCyclesTotal) {
                 enterState(WasherState::Spinning);
 
+            }else {
+                rinsePhase = RinsePhase::Filling;
+                
             }
-            
 
         }
 
@@ -190,7 +193,7 @@ void WasherController::handleRinsing() {
         actuators.setDrainPump(false);
         actuators.setMotorSpeed(0);
 
-        if(sensors.getWaterLevel() == rinseTargetWaterLevel) {
+        if(sensors.getWaterLevel() >= rinseTargetWaterLevel) {
             actuators.setWaterValve(false);
 
             stateElapsedMs = 0;
@@ -207,9 +210,8 @@ void WasherController::handleRinsing() {
 
         if(stateElapsedMs >= rinseAgitateTimeMs) {
             stateElapsedMs = 0;
+            rinseCyclesCompleted++;
             rinsePhase = RinsePhase::Drain;
-            rinsingSecondDrain = true;
-
         }
         break;
 
@@ -233,7 +235,7 @@ void WasherController::handleSpinning() {
 void WasherController::handleError() {
     actuators.setWaterValve(false);
     actuators.setHeater(false);
-    actuators.setMotorSpeed(false);
+    actuators.setMotorSpeed(0);
 
     if(sensors.getWaterLevel() > 0) {
         actuators.setDrainPump(true);

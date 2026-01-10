@@ -11,6 +11,7 @@ WashConfig getWashConfig(WashMode mode) {
             cfg.rinseTimeMs = 5000;
             cfg.rinseAgitateTimeMs = 3000;
             cfg.spinTimeMs = 3000;
+            cfg.rinseCycles = 2;
             cfg.heaterOnDuringWash = false;
             break;
 
@@ -21,6 +22,7 @@ WashConfig getWashConfig(WashMode mode) {
             cfg.rinseTimeMs = 3000;
             cfg.rinseAgitateTimeMs = 2000;
             cfg.spinTimeMs = 2000;
+            cfg.rinseCycles = 1;
             cfg.heaterOnDuringWash = false;
             break;
 
@@ -31,6 +33,7 @@ WashConfig getWashConfig(WashMode mode) {
             cfg.rinseTimeMs = 7000;
             cfg.rinseAgitateTimeMs = 5000;
             cfg.spinTimeMs = 4000;
+            cfg.rinseCycles = 3;
             cfg.heaterOnDuringWash = true;
             break;
 
@@ -41,6 +44,7 @@ WashConfig getWashConfig(WashMode mode) {
             cfg.rinseTimeMs = 5000;
             cfg.rinseAgitateTimeMs = 3000;
             cfg.spinTimeMs = 3000;
+            cfg.rinseCycles = 2;
             cfg.heaterOnDuringWash = false;
             break;
     }

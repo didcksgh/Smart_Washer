@@ -44,8 +44,9 @@ private:
     int rinseAgitateTimeMs;
     int rinseTimeMs;
     int spinTimeMs;
+    int rinseCyclesTotal;
+    int rinseCyclesCompleted;
     bool heaterOnDuringWash;
-    bool rinsingSecondDrain;
     bool stateChangedThisTick;
 
     

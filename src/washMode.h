@@ -15,6 +15,7 @@ struct WashConfig {
     int rinseTimeMs;
     int rinseAgitateTimeMs;
     int spinTimeMs;
+    int rinseCycles;
     bool heaterOnDuringWash;
 };
 

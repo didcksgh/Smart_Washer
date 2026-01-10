@@ -16,7 +16,7 @@ int main() {
 
     const int tickMs = 500;
 
-    controller.startCycle(WashMode::Normal);
+    controller.startCycle(WashMode::Heavy);
 
 
     using clock = std::chrono::steady_clock;
@@ -25,7 +25,7 @@ int main() {
     bool cycleStarted = false;
 
 
-    for(int i = 0; i < 500; i++) {
+    for(int i = 0; i < 800; i++) {
 
 
         //break if the door is not closed and all the water is drained
