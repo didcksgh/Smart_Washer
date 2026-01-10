@@ -27,6 +27,13 @@ int main() {
 
     for(int i = 0; i < 500; i++) {
 
+
+        //break if the door is not closed and all the water is drained
+        if(cycleStarted == true && controller.getState() == WasherState::Error && sensors.getWaterLevel() == 0) {
+            break;
+
+        }
+
         auto now = clock::now();
 
         int elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - prev).count();

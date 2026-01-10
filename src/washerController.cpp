@@ -1,4 +1,5 @@
 #include "washerController.h"
+#include <iostream>
 
 WasherController::WasherController(SensorModule& sensorsRef, ActuatorModule& actuatorsRef)
     : sensors(sensorsRef), actuators(actuatorsRef) {
@@ -21,7 +22,8 @@ WasherController::WasherController(SensorModule& sensorsRef, ActuatorModule& act
 }
 
 void WasherController::startCycle(WashMode newMode) {
-    if (state == WasherState::Idle) {
+
+    if ((state == WasherState::Idle || state == WasherState::Error) && sensors.isDoorClosed()) {
         mode = newMode;
         WashConfig cfg = getWashConfig(mode);
 
@@ -38,6 +40,15 @@ void WasherController::startCycle(WashMode newMode) {
 }
 
 void WasherController::update(int elapsedMs) {
+    //handle error: Door is not closed
+    if(state != WasherState::Idle && state != WasherState::Error ) {
+        if(!sensors.isDoorClosed()) {
+            enterState(WasherState::Error);
+            std::cout<< "Warning! Door is not closed." << std::endl;
+
+        }
+    }
+
     stateElapsedMs += elapsedMs;
 
     //guard to prevent inifinite loop
@@ -60,7 +71,7 @@ void WasherController::update(int elapsedMs) {
             handleSpinning();
             break;
         case WasherState::Error:
-            handleIdle();
+            handleError();
             break;
         }
 
@@ -102,6 +113,12 @@ void WasherController::enterState(WasherState newState) {
     stateChangedThisTick = true;
 
     if(newState == WasherState::Rinsing) {
+        rinsePhase = RinsePhase::Drain;
+        rinsingSecondDrain = false;
+
+    }
+
+    if(newState == WasherState::Error) {
         rinsePhase = RinsePhase::Drain;
         rinsingSecondDrain = false;
 
@@ -211,5 +228,17 @@ void WasherController::handleSpinning() {
         enterState(WasherState::Idle);
 
     }
+}
 
+void WasherController::handleError() {
+    actuators.setWaterValve(false);
+    actuators.setHeater(false);
+    actuators.setMotorSpeed(false);
+
+    if(sensors.getWaterLevel() > 0) {
+        actuators.setDrainPump(true);
+
+    }else {
+        actuators.setDrainPump(false);
+    }
 }

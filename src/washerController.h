@@ -34,6 +34,7 @@ private:
     void handleWashing();
     void handleRinsing();
     void handleSpinning();
+    void handleError();
 
     int stateElapsedMs;
 
