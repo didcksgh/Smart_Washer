@@ -179,6 +179,7 @@ void WasherController::handleRinsing() {
                 enterState(WasherState::Spinning);
 
             }else {
+                stateChangedThisTick = true;
                 rinsePhase = RinsePhase::Filling;
                 
             }
@@ -197,6 +198,7 @@ void WasherController::handleRinsing() {
             actuators.setWaterValve(false);
 
             stateElapsedMs = 0;
+            stateChangedThisTick = true;
             rinsePhase = RinsePhase::Agitate;
 
         }
@@ -211,6 +213,7 @@ void WasherController::handleRinsing() {
         if(stateElapsedMs >= rinseAgitateTimeMs) {
             stateElapsedMs = 0;
             rinseCyclesCompleted++;
+            stateChangedThisTick = true;
             rinsePhase = RinsePhase::Drain;
         }
         break;

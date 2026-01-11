@@ -1,4 +1,6 @@
 #include <iostream>
+#include <string>
+#include <limits>
 #include <chrono>
 #include <thread>
 
@@ -8,6 +10,45 @@
 #include "logger.h"
 #include "washMode.h"
 
+WashMode readWashModeFromUser() {
+
+    while(true) {
+        std::cout << "Select Wash Mode:\n";
+        std::cout << "  1. Normal\n";
+        std::cout << "  2. Quick\n";
+        std::cout << "  3. Heavy\n";
+        std::cout << "> ";
+
+        
+        int choice;
+        std::cin >> choice;
+
+        if (std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input. Please try again.\n\n";
+            continue;
+        }
+
+        switch (choice)
+        {
+        case 1:
+            return WashMode::Normal;
+        
+        case 2:
+            return WashMode::Quick;
+
+        case 3:
+            return WashMode::Heavy;
+        
+        default:
+            std::cout << "Invalid selection. Try again.\n\n";
+        
+        }
+
+    }
+}
+
 int main() {
     SensorModule sensors;
     ActuatorModule actuators;
@@ -16,7 +57,9 @@ int main() {
 
     const int tickMs = 500;
 
-    controller.startCycle(WashMode::Heavy);
+    WashMode selectedMode = readWashModeFromUser();
+
+    controller.startCycle(selectedMode);
 
 
     using clock = std::chrono::steady_clock;
