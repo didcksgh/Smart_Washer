@@ -61,6 +61,31 @@ static const char* phaseToStr(RinsePhase r) {
     }
 }
 
+static const char* faultToStr(FaultCode f) {
+    switch (f)
+    {
+    case FaultCode::None:
+        return "None";
+        break;
+
+    case FaultCode::DoorOpen:
+        return "DoorOpen";
+        break;
+    
+    case FaultCode::DrainTimeout:
+        return "DrainTimeOut";
+        break;
+
+    case FaultCode::FillTimeout:
+        return "FillTimeout";
+        break;
+    
+    default:
+        return "UnknownError";
+        break;
+    }
+}
+
 void Logger::logState(WasherState state) {
     std::cout << "[STATE] " << stateToStr(state) << std::endl;
 }
@@ -69,7 +94,7 @@ void Logger::logMode(WashMode mode) {
     std::cout << "[MODE] " << modeToStr(mode) << std::endl;
 }
 
-void Logger::logStatus(WashMode mode, WasherState state, RinsePhase phase,
+void Logger::logStatus(WashMode mode, WasherState state, RinsePhase phase, FaultCode fault,
                        int waterLevel,
                        const ActuatorStatus& actuators) {
     if(state == WasherState::Rinsing) {
@@ -78,6 +103,8 @@ void Logger::logStatus(WashMode mode, WasherState state, RinsePhase phase,
         << " [STATE] " << stateToStr(state)
         << " | "
         << "[PHASE] " << phaseToStr(phase)
+        << " | "
+        << " [FaultCode] " << faultToStr(fault)
         << " | "
         << " level=" << waterLevel
         << " valve=" << actuators.valveOpen
@@ -90,6 +117,8 @@ void Logger::logStatus(WashMode mode, WasherState state, RinsePhase phase,
     std::cout << "[MODE] " << modeToStr(mode)
     << " | "
     << " [STATE] " << stateToStr(state)
+    << " | "
+    << " [FaultCode] " << faultToStr(fault)
     << " | "
     << " level=" << waterLevel
     << " valve=" << actuators.valveOpen

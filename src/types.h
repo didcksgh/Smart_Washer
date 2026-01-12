@@ -17,6 +17,13 @@ enum class RinsePhase{
         Drain
 };
 
+enum class FaultCode {
+    None,
+    FillTimeout,
+    DrainTimeout,
+    DoorOpen
+};
+
 struct Sensors {
     bool doorClosed;
     int waterLevel; // 0 to 100

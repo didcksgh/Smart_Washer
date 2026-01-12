@@ -16,6 +16,7 @@ public:
     WasherState getState() const;
     WashMode getMode() const;
     RinsePhase getPhase() const;
+    FaultCode getFault() const;
 
 
 
@@ -27,6 +28,10 @@ private:
     WasherState state;
     WashMode mode;
     RinsePhase rinsePhase;
+    FaultCode fault;
+
+    static const int MAX_FILL_TIME_MS  = 50000;
+    static const int MAX_DRAIN_TIME_MS = 50000;
 
     void enterState(WasherState newState);
     void handleIdle();

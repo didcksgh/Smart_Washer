@@ -1,11 +1,11 @@
 #include "washerController.h"
-#include <iostream>
 
 WasherController::WasherController(SensorModule& sensorsRef, ActuatorModule& actuatorsRef)
     : sensors(sensorsRef), actuators(actuatorsRef) {
         state = WasherState::Idle;
         mode = WashMode::Normal;
         rinsePhase = RinsePhase::Drain;
+        fault = FaultCode::None;
         stateElapsedMs = 0;
 
         //default config values in Feature 1
@@ -47,7 +47,7 @@ void WasherController::update(int elapsedMs) {
     if(state != WasherState::Idle && state != WasherState::Error ) {
         if(!sensors.isDoorClosed()) {
             enterState(WasherState::Error);
-            std::cout<< "Warning! Door is not closed." << std::endl;
+            fault = FaultCode::DoorOpen;
 
         }
     }
@@ -110,6 +110,10 @@ RinsePhase WasherController::getPhase() const {
     return rinsePhase;
 }
 
+FaultCode WasherController::getFault() const {
+    return fault;
+}
+
 void WasherController::enterState(WasherState newState) {
     state = newState;
     stateElapsedMs = 0;
@@ -117,7 +121,6 @@ void WasherController::enterState(WasherState newState) {
 
     if(newState == WasherState::Rinsing) {
         rinsePhase = RinsePhase::Drain;
-        rinseCyclesCompleted = 0;
 
     }
 
@@ -145,7 +148,11 @@ void WasherController::handleFilling() {
     if(sensors.getWaterLevel() >= targetWaterLevel) {
         actuators.setWaterValve(false);
         enterState(WasherState::Washing);
+    }
 
+    if (stateElapsedMs > MAX_FILL_TIME_MS) {
+        fault = FaultCode::FillTimeout;
+        enterState(WasherState::Error);
     }
 }
 
@@ -186,6 +193,12 @@ void WasherController::handleRinsing() {
 
         }
 
+        if (stateElapsedMs > MAX_DRAIN_TIME_MS) {
+            fault = FaultCode::DrainTimeout;
+            enterState(WasherState::Error);
+        }
+
+
         break;
     
     case RinsePhase::Filling:
@@ -201,6 +214,11 @@ void WasherController::handleRinsing() {
             stateChangedThisTick = true;
             rinsePhase = RinsePhase::Agitate;
 
+        }
+
+        if (stateElapsedMs > MAX_FILL_TIME_MS) {
+            fault = FaultCode::FillTimeout;
+            enterState(WasherState::Error);
         }
         break;
 

@@ -7,6 +7,6 @@ class Logger {
 public:
     void logState(WasherState state);
     void logMode(WashMode mode);
-    void logStatus(WashMode mode, WasherState state, RinsePhase phase, int waterLevel, const ActuatorStatus& actuators);
+    void logStatus(WashMode mode, WasherState state, RinsePhase phase, FaultCode fault, int waterLevel, const ActuatorStatus& actuators);
 
 };
