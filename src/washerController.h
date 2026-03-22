@@ -51,8 +51,10 @@ private:
     int spinTimeMs;
     int rinseCyclesTotal;
     int rinseCyclesCompleted;
+    int motorSpeed;
     bool heaterOnDuringWash;
     bool stateChangedThisTick;
+
 
     
 

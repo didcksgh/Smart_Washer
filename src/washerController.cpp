@@ -19,6 +19,7 @@ WasherController::WasherController(SensorModule& sensorsRef, ActuatorModule& act
         heaterOnDuringWash = false;
         rinseCyclesTotal = 2;
         rinseCyclesCompleted = 0;
+        motorSpeed = 1;
 
 }
 
@@ -36,6 +37,7 @@ void WasherController::startCycle(WashMode newMode) {
         spinTimeMs = cfg.spinTimeMs;
         heaterOnDuringWash = cfg.heaterOnDuringWash;
         rinseCyclesTotal = cfg.rinseCycles;
+        motorSpeed = cfg.motorSpeed;
         rinseCyclesCompleted = 0;
 
         enterState(WasherState::Filling);
@@ -160,7 +162,7 @@ void WasherController::handleWashing() {
     actuators.setWaterValve(false);
     actuators.setHeater(heaterOnDuringWash);
     actuators.setDrainPump(false);
-    actuators.setMotorSpeed(1);
+    actuators.setMotorSpeed(motorSpeed);
 
     if(stateElapsedMs >= washTimeMs) {
         enterState(WasherState::Rinsing);
@@ -226,7 +228,7 @@ void WasherController::handleRinsing() {
         actuators.setWaterValve(false);
         actuators.setHeater(false);
         actuators.setDrainPump(false);
-        actuators.setMotorSpeed(1);
+        actuators.setMotorSpeed(motorSpeed);
 
         if(stateElapsedMs >= rinseAgitateTimeMs) {
             stateElapsedMs = 0;
@@ -245,7 +247,7 @@ void WasherController::handleSpinning() {
     actuators.setWaterValve(false);
     actuators.setHeater(false);
     actuators.setDrainPump(true);
-    actuators.setMotorSpeed(2);
+    actuators.setMotorSpeed(motorSpeed);
 
     if(stateElapsedMs >= spinTimeMs) {
         enterState(WasherState::Idle);

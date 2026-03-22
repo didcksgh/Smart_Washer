@@ -70,7 +70,6 @@ int main() {
 
     for(int i = 0; i < 800; i++) {
 
-
         //break if the door is not closed and all the water is drained
         if(cycleStarted == true && controller.getState() == WasherState::Error && sensors.getWaterLevel() == 0) {
             break;
